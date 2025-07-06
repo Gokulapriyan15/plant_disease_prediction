@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Plant Disease Prediction</title>
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2907/2907498.png" />
+  <style>
+    /* Reset and base styles */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0 1rem;
+      background-color: #f0f8f5;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+
+    header {
+      text-align: center;
+      margin: 2rem 0 1rem;
+    }
+    header h1 {
+      font-size: 2.4rem;
+      margin: 0;
+      color: #2f855a;
+    }
+    body.dark header h1 {
+      color: #9ae6b4;
+    }
+
+    main {
+      flex-grow: 1;
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark main {
+      background-color: #222;
+      color: #ddd;
+      box-shadow: 0 0 15px rgba(255,255,255,0.1);
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    input[type="file"] {
+      border: 2px dashed #4caf50;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 400px;
+      border-radius: 10px;
+      cursor: pointer;
+      background: #f9fff9;
+      transition: background-color 0.3s;
+    }
+    input[type="file"]:hover {
+      background: #e6f4e6;
+    }
+    body.dark input[type="file"] {
+      background: #2a2a2a;
+      border-color: #9ae6b4;
+    }
+    body.dark input[type="file"]:hover {
+      background: #3a3a3a;
+    }
+
+    button {
+      background-color: #38a169;
+      color: white;
+      font-weight: bold;
+      padding: 0.8rem 2.5rem;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(56,161,105,0.4);
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+    button:hover {
+      background-color: #2f855a;
+      box-shadow: 0 8px 20px rgba(47,133,90,0.6);
+    }
+
+    .result {
+      margin-top: 2rem;
+      text-align: center;
+      padding: 1.5rem;
+      border-radius: 12px;
+      background-color: #e6ffe6;
+      color: #2f855a;
+      box-shadow: 0 0 12px rgba(47,133,90,0.3);
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark .result {
+      background-color: #1b4521;
+      color: #a0f0a0;
+      box-shadow: 0 0 12px #4caf50aa;
+    }
+
+    .result img {
+      margin-top: 1rem;
+      max-width: 300px;
+      max-height: 300px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      object-fit: contain;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem 0;
+      font-size: 0.9rem;
+      background-color: #f0f8f5;
+      color: #444;
+      border-top: 1px solid #ddd;
+      display: flex;
+      justify-content: center;
+      gap: 1.2rem;
+      align-items: center;
+      flex-wrap: wrap;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark footer {
+      background-color: #121212;
+      color: #bbb;
+      border-color: #333;
+    }
+    footer p {
+      margin: 0;
+    }
+    footer a {
+      color: inherit;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    footer a img {
+      width: 24px;
+      height: 24px;
+      filter: grayscale(100%);
+      transition: filter 0.3s;
+    }
+    footer a:hover img {
+      filter: none;
+    }
+
+    /* Dark mode toggle */
+    .dark-mode-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: #fff;
+      border-radius: 25px;
+      padding: 0.5rem 1rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
+      font-size: 0.9rem;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark .dark-mode-toggle {
+      background: #222;
+      color: #ccc;
+      box-shadow: 0 0 15px #4caf50aa;
+    }
+    .dark-mode-toggle input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      main {
+        padding: 1rem;
+      }
+      button {
+        width: 100%;
+      }
+      input[type="file"] {
+        max-width: 100%;
+      }
+      .result img {
+        max-width: 90vw;
+        max-height: 90vw;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dark-mode-toggle">
+    <label for="darkModeSwitch">🌙 Dark Mode</label>
+    <input type="checkbox" id="darkModeSwitch" />
+  </div>
+
+  <header>
+    <h1>🌿 Plant Disease Prediction</h1>
+  </header>
+
+  <main>
+    <form method="POST" enctype="multipart/form-data">
+      <label for="imageUpload">Upload Plant Leaf Image</label>
+      <input type="file" name="image" id="imageUpload" required />
+      <!--<input type="file" name="image" required />-->
+      <button type="submit">Predict</button>
+    </form>
+
+    {% if result %}
+    <div class="result" role="alert" aria-live="polite">
+      <h2>Prediction Result</h2>
+      <p><strong>Disease:</strong> {{ result.label }}</p>
+      <p><strong>Confidence:</strong> {{ result.accuracy }}</p>
+      <p><strong>Remedy:</strong> {{ result.remedy }}</p>
+      <img src="{{ result.image }}" alt="Uploaded leaf image" />
+    </div>
+    {% endif %}
+  </main>
+
+  <footer>
+    <p>Developed by <strong>Gokula Priyan R</strong></p>
+
+    <a href="https://www.linkedin.com/in/gokula-priyan-8a4806258/" target="_blank" rel="noopener" aria-label="LinkedIn Profile">
+      <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn Logo" />
+    </a>
+
+    <a href="https://github.com/Gokulapriyan15" target="_blank" rel="noopener" aria-label="GitHub Profile">
+      <img src="https://cdn-icons-png.flaticon.com/512/733/733553.png" alt="GitHub Logo" />
+    </a>
+
+    <a href="mailto:gokulapriyan15@gmail.com" aria-label="Send Email to Gokula Priyan">
+      <img src="https://cdn-icons-png.flaticon.com/512/561/561127.png" alt="Email Icon" />
+    </a>
+  </footer>
+
+  <script>
+    // Dark mode toggle logic with localStorage persistence
+    const toggleSwitch = document.getElementById('darkModeSwitch');
+    const currentTheme = localStorage.getItem('theme');
+
+    if (currentTheme === 'dark') {
+      document.body.classList.add('dark');
+      toggleSwitch.checked = true;
+    }
+
+    toggleSwitch.addEventListener('change', () => {
+      if (toggleSwitch.checked) {
+        document.body.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.body.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      }
+    });
+  </script>
+
+</body>
+</html>
+
+
+<!--<!DOCTYPE html>
+<html>
+<head>
+    <title>Plant Disease Prediction</title>
+</head>
+<body>
+    <h2>Upload a Plant Leaf Image</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="image" required><br><br>
+        <input type="submit" value="Predict">
+    </form>
+
+    {% if result %}
+        <h3>Result</h3>
+        <p><strong>Disease:</strong> {{ result.label }}</p>
+        <p><strong>Confidence:</strong> {{ result.accuracy }}</p>
+        <p><strong>Remedy:</strong> {{ result.remedy }}</p>
+        <img src="{{ result.image }}" width="300">
+    {% endif %}
+</body>
+</html> 
+-->
+
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plant Disease Detector</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2907/2907498.png" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      background-color: #f0f8f5;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .dark {
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .upload-form {
+      margin: 1rem auto;
+      padding: 1rem;
+      border: 2px dashed #aaa;
+      border-radius: 10px;
+      background: white;
+    }
+
+    .upload-form input[type="file"] {
+      display: block;
+      margin: 1rem auto;
+    }
+
+    .upload-form button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .upload-form button:hover {
+      background-color: #45a049;
+    }
+
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+    }
+
+    footer img {
+      vertical-align: middle;
+      margin-left: 8px;
+    }
+
+    .dark-mode-toggle {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+    }
+
+    @media screen and (max-width: 600px) {
+      .upload-form {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dark-mode-toggle">
+    <label>
+      🌙 Dark Mode
+      <input type="checkbox" id="darkModeSwitch" />
+    </label>
+  </div>
+
+  <div class="container">
+    <h1>🌿 Plant Disease Prediction</h1>
+    <form action="/" method="post" enctype="multipart/form-data" class="upload-form">
+      <input type="file" name="image" required>
+      <button type="submit">Predict</button>
+    </form>
+  </div>
+
+  <footer>
+    <p>Developed by <strong>Gokula Priyan</strong></p>
+    <a href="https://www.linkedin.com/in/gokula-priyan-8a4806258/" target="_blank">
+      <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" width="24">
+    </a>
+  </footer>
+
+  <script>
+    const toggleSwitch = document.getElementById('darkModeSwitch');
+    toggleSwitch.addEventListener('change', () => {
+      document.body.classList.toggle('dark');
+    });
+  </script>
+</body>
+</html> -->
+
